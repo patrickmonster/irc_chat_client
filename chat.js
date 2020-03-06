@@ -14,7 +14,7 @@ var chatClient = function chatClient(options){
   this.server='irc-ws.chat.twitch.tv';
 }
 chatClient.prototype.open = function open(){
-	this.webSocket = new WebSocket('wss://' + this.server + (this.port==80?'':':'+this.port));
+	this.webSocket = new WebSocket('wss://'+this.server+(this.port==80?'':':'+this.port));
 	this.webSocket.onmessage = this.onMessage.bind(this);
 	this.webSocket.onerror = this.onError.bind(this);
 	this.webSocket.onclose = this.onClose.bind(this);
@@ -107,7 +107,10 @@ chatClient.prototype.parseMessage = function(rawMessage) {
     }
   return parsedMessage;
 };
-chatClient.prototype.parseTwitchEmoticon = function(message, emotes) {
+chatClient.prototype.parseTwitchEmoticon = function(message, emotes){
+
+}
+chatClient.prototype.parseTwitchEmoticon = function(message, emotes){
 	let ranges, id, emote_id, regExp;
 	const replace_list = {};
 
@@ -124,13 +127,11 @@ chatClient.prototype.parseTwitchEmoticon = function(message, emotes) {
 				replace_list[emote_id] = id;
 			}
 		});
-
 		for (const replace_id in replace_list) {
 			regExp = new RegExp(escapeRegExp(replace_id), "g");
 			message = message.replace(regExp, "");
 		}
 	}
-
 	return message;
 }
 chatClient.prototype.onSend = function(message){
@@ -146,3 +147,43 @@ chatClient.prototype.onBits = function(bit,name,message){console.log(message)};
 chatClient.prototype.onCommand = function(message,parsed){console.log(message)};
 chatClient.prototype.onClose = function(){console.log('Disconnected from the chat server.');};
 chatClient.prototype.close = function(){if(this.webSocket)this.webSocket.close()};
+
+function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
+	if (document.location.hash!==""&&document.location.hash.indexOf("access_token")!==-1){
+		const rawauth = document.location.href.replace("#", "?");
+		const authobj = new URL(rawauth);
+		const oauth = getParams("access_token", rawauth);
+		const state = getParams("state", rawauth);
+		const localstate = localStorage.getItem("state");
+		const last_url = localStorage.getItem("last_url");
+		const last_url_obj = new URL(last_url);
+		document.body.innerHTML = '';
+		if (last_url_obj.origin !== authobj.origin) {
+			document.write("SECURITY ERROR");
+		} else {
+			if (localstate === null||localstate===""|| state !== localstate) {
+				document.write("잘못된 state값이 전달되었습니다. 페이지를 새로고침 해보세요.<br/>Invalid state. please refresh and retry.")
+				localStorage.setItem("oauth","");
+				localStorage.setItem("state","");
+				localStorage.setItem("last_url","");
+			} else {
+				localStorage.setItem("oauth", oauth);
+				localStorage.setItem("state", "");
+				localStorage.setItem("last_url", "");
+				location.href=last_url;
+			}
+		}
+	}else{
+		const state = md5(Date.now());
+		localStorage.setItem("state", state);
+		localStorage.setItem("last_url", location.href);
+		setTimeout(function(){
+			var link = "https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id="+
+			window.oauth_client_id +//클라이언트 id
+			"&redirect_uri="+window.oauth_redirect_uri+//리다이렉션 아이디
+			"&scope=chat:edit%20chat:read%20channel_editor%20whispers:edit%20whispers:read%20channel:moderate&state="+state;
+			//채팅 퍼미션
+			location.href = link;
+		},1000);
+	}
+}
