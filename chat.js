@@ -17,12 +17,11 @@ chatClient.prototype.open = function open(){
 	var target = 'wss://' + this.server + (this.port==80?'':':'+this.port);
 	if(this.port==80)
 		this.webSocket = new WebSocket(target,'irc');
-	else this.webSocket = new WebSocket(target,);
+	else this.webSocket = new WebSocket(target);
 	this.webSocket.onmessage = this.onMessage.bind(this);
 	this.webSocket.onerror = this.onError.bind(this);
 	this.webSocket.onclose = this.onClose.bind(this);
 	this.webSocket.onopen = this.onOpen.bind(this);
-	console.log(target);
 };
 chatClient.prototype.onOpen = function onOpen(){
 	var socket = this.webSocket;
@@ -32,7 +31,6 @@ chatClient.prototype.onOpen = function onOpen(){
 		socket.send('PASS oauth:' + this.password);
 		socket.send('NICK ' + this.username);
 		socket.send('JOIN #' + this.channel);
-		this.onConsole("Connecting!");
 	}
 };
 chatClient.prototype.getUser = function(user,func){
@@ -54,9 +52,7 @@ chatClient.prototype.parseMessage = function(rawMessage) {
 			else parsedMessage["message"] = rawMessage
     }else if (rawMessage.indexOf("PING") != -1){
       parsedMessage['PING'] = rawMessage.substring(rawMessage.indexOf(":")+1);
-			setTimeout(function(){
-				this.webSocket.send("PING");
-			},60*1000);
+			setTimeout(function(t){t.webSocket.send("PING")},60*1000,this);
     }else {
       for (var i = 0; i < data.length; i++){
         var d = data[i].split("=");
@@ -74,10 +70,8 @@ chatClient.prototype.parseMessage = function(rawMessage) {
 };
 chatClient.prototype.onSend = function(message){
   var socket = this.webSocket;
-  if (socket !== null && socket.readyState === 1) {
-      console.log('Send : ' + message);
+  if (socket !== null && socket.readyState === 1)
       socket.send('PRIVMSG #' + this.channel + " :"+ message);
-  }
 };
 chatClient.prototype.onMessage = function onMessage(message){
   if(message !== null){
@@ -101,10 +95,10 @@ chatClient.prototype.onMessage = function onMessage(message){
             if (parsed["emotes"]){
               var img = "https://static-cdn.jtvnw.net/emoticons/v1/";
               var emotes = parsed["emotes"].split("/");
-              for(var i in emotes){
-                var index=emotes[i].substring(emotes[i].indexOf(":")+1).split(",");
-                this.onEmotes(img+emotes[i].substring(0,index-1)+"/3.0",index.length);
-              }
+							console.log(emotes);
+              for(var i of emotes)
+                this.onEmotes(img+i.substring(0,i.indexOf(":"))+"/3.0",i.substring(i.indexOf(":")+1).split(",").length);
+							parsed["emotes_message"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"]);
             }
             if (parsed["bits"])
               this.onBits(parsed["bits"],parsed["display-name"],parsed.message);
@@ -122,13 +116,40 @@ chatClient.prototype.onMessage = function onMessage(message){
 		}
   }
 };
+chatClient.prototype.replaceTwitchEmoticon=function(message, emotes) {
+	let ranges, id, emote_id, regExp;
+	const replace_list = {};
+
+	if (typeof emotes != 'undefined') {
+		const emote_list = emotes.split("/");
+		emote_list.forEach(function (emote_replace) {
+			ranges = emote_replace.split(":");
+			id = ranges[0];
+			if (typeof ranges[1] == 'undefined') return;
+			ranges = ranges[1].split(",");
+			if (typeof ranges[0] != 'undefined') {
+				ranges = ranges[0].split("-");
+				emote_id = message.substring(parseInt(ranges[0]), parseInt(ranges[1]) + 1);
+				replace_list[emote_id] = id;
+			}
+		});
+
+		for (const replace_id in replace_list) {
+			regExp = new RegExp(escapeRegExp(replace_id), "g");
+			message = message.replace(regExp, "");
+		}
+	}
+	return message;
+}
+function escapeRegExp(str) {
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
 chatClient.prototype.onError = function onError(message){console.log('Error: '+message)};
 chatClient.prototype.onChating = function(parsed){console.log(parsed)};
 chatClient.prototype.onEmotes = function(parsed,count){console.log(parsed)};
 chatClient.prototype.onHighlighted = function(message){console.log(message)};
 chatClient.prototype.onBits = function(bit,name,message){console.log(message)};
 chatClient.prototype.onJoin = function(message){console.log(message)};
-chatClient.prototype.onConsole = function(message){console.log(message)};
 chatClient.prototype.onCommand = function(message,parsed){console.log(message)};
 chatClient.prototype.onClose = function(){console.log('Disconnected from the chat server.');};
 chatClient.prototype.close = function(){if(this.webSocket)this.webSocket.close()};
@@ -170,4 +191,13 @@ function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 			location.href = link;
 		},1000);
 	}
+}
+
+function getChannel(oauth){//스트리머 채널값 가져오기
+	var xmlhttp = new XMLHttpRequest(),channel="";
+	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
+	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
+	xmlhttp.setRequestHeader('Authorization','OAuth '+oauth);
+	xmlhttp.send();
+	return channel;
 }
