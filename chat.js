@@ -32,6 +32,7 @@ chatClient.prototype.onOpen = function onOpen(){
 };
 chatClient.prototype.onMessage = function onMessage(message){
   if(message !== null){
+		console.log(message);
       var parsed = this.parseMessage(message.data.replace("\n","").replace("\r",""));
       if(parsed !== null){
         switch(parsed.command){
