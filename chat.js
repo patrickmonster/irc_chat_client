@@ -76,6 +76,7 @@ chatClient.prototype.onSend = function(message){
 };
 chatClient.prototype.onMessage = function onMessage(message){
   if(message !== null){
+		this.onSys(message.data);
 		var messages = message.data.replace("\r","").split("\n");
 		for(var msg of messages){
       var parsed = this.parseMessage(msg);
@@ -146,6 +147,7 @@ function escapeRegExp(str) {
 	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 chatClient.prototype.onError = function onError(message){console.log('Error: '+message)};
+chatClient.prototype.onSys=function onSys(message){console.log(message)};
 chatClient.prototype.onChating = function(parsed){console.log(parsed)};
 chatClient.prototype.onEmotes = function(parsed,count){console.log(parsed)};
 chatClient.prototype.onHighlighted = function(message){console.log(message)};
