@@ -1,4 +1,5 @@
 var chatClient = function chatClient(options){
+	var makeRandom=(min,max)=>{return Math.floor(Math.random()*(max-min+1))+min}
 	if(!options.password){
 		this.password = "SCHMOOPIIE";//익명의 사용자
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
