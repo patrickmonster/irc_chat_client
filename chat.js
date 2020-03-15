@@ -109,10 +109,9 @@ chatClient.prototype.onMessage = function onMessage(message){
             if (parsed["emotes"]){
               var img = "https://static-cdn.jtvnw.net/emoticons/v1/";
               var emotes = parsed["emotes"].split("/");
-							console.log(emotes);
               for(var i of emotes)
-                this.onEmotes(img+i.substring(0,i.indexOf(":"))+"/3.0",i.substring(i.indexOf(":")+1).split(",").length);
-							parsed["emotes_message"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"]);
+                this.onEmotes(img+i.substring(0,i.indexOf(":"))+"/3.0",i.substring(i.indexOf(":")+1).split(",").length);//이모티콘
+							parsed["message"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"]);
             }
             if (parsed["bits"])
               this.onBits(parsed["bits"],parsed["display-name"],parsed.message);
