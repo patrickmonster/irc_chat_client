@@ -123,8 +123,10 @@ chatClient.prototype.onMessage = function onMessage(message){
 						this.onChating(parsed);
             break;
           default:
-            if (parsed["PING"])this.webSocket.send("PONG :"+parsed['PING']);
-						setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
+            if (parsed["PING"]){
+							this.webSocket.send("PONG :"+parsed['PING']);
+							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
+						}
 						break;
         }
       }
