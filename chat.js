@@ -1,10 +1,13 @@
+
 var chatClient = function chatClient(options){
 	var makeRandom=(min,max)=>{return Math.floor(Math.random()*(max-min+1))+min}
+	window.oauth_redirect_uri=this.redirect_uri = "https://patrickmonster.github.io/tgd/twitch/tts.html";
 	if(!options.password){
 		this.password = "SCHMOOPIIE";//익명의 사용자
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
 		this.port=80;
-	}else{
+	}else{//인증키가 있는 채팅
+		if(!options.channel)getChannel(option.password);
 		this.username = options.username;
 		this.password = options.password;
 	  this.port=443;
@@ -13,6 +16,14 @@ var chatClient = function chatClient(options){
 	this.isMood=false;
   this.channel=options.channel;
   this.server='irc-ws.chat.twitch.tv';
+}
+chatClient.prototype.getChannel=function(oauth){
+	var xmlhttp = new XMLHttpRequest(),channel="";
+	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
+	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
+	xmlhttp.setRequestHeader('Authorization','OAuth '+oauth);
+	xmlhttp.send();
+	return channel;
 }
 chatClient.prototype.open = function open(){
 	var target = 'wss://' + this.server + (this.port==80?'':':'+this.port);
@@ -88,8 +99,9 @@ chatClient.prototype.onMessage = function onMessage(message){
             break;
           case "PING":
             this.webSocket.send("PONG :"+parsed['PING']);
-          case "USERNOTICE":
-            break;
+						setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
+						break;
+          case "USERNOTICE":break;
           case "PRIVMSG":
             if (parsed["@ban-duration"])return;
             if(parsed["user-type"])
@@ -113,6 +125,8 @@ chatClient.prototype.onMessage = function onMessage(message){
             break;
           default:
             if (parsed["PING"])this.webSocket.send("PONG :"+parsed['PING']);
+						setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
+						break;
         }
       }
 		}
@@ -156,6 +170,8 @@ chatClient.prototype.onJoin = function(message){console.log(message)};
 chatClient.prototype.onCommand = function(message,parsed){console.log(message)};
 chatClient.prototype.onClose = function(){console.log('Disconnected from the chat server.');};
 chatClient.prototype.close = function(){if(this.webSocket)this.webSocket.close()};
+
+//채팅 권한
 function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 	if (document.location.hash!==""&&document.location.hash.indexOf("access_token")!==-1){
 		const rawauth = document.location.href.replace("#", "?");
@@ -194,13 +210,4 @@ function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 			location.href = link;
 		},1000);
 	}
-}
-
-function getChannel(oauth){//스트리머 채널값 가져오기
-	var xmlhttp = new XMLHttpRequest(),channel="";
-	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
-	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
-	xmlhttp.setRequestHeader('Authorization','OAuth '+oauth);
-	xmlhttp.send();
-	return channel;
 }
