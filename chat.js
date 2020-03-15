@@ -7,7 +7,7 @@ var chatClient = function chatClient(options){
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
 		this.port=80;
 	}else{//인증키가 있는 채팅
-		if(!options.channel)getChannel(option.password);
+		if(!options.channel)options.channel=JSON.parse(getChannel(option.password))["login"];
 		this.username = options.username;
 		this.password = options.password;
 	  this.port=443;
