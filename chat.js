@@ -2,20 +2,12 @@
 var chatClient = function chatClient(options){
 	var makeRandom=(min,max)=>{return Math.floor(Math.random()*(max-min+1))+min}
 	window.oauth_redirect_uri=this.redirect_uri = "https://patrickmonster.github.io/tgd/twitch/tts.html";
-	this.getChannel=function(){
-		var xmlhttp = new XMLHttpRequest(),channel="";
-		xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
-		xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
-		xmlhttp.setRequestHeader('Authorization','OAuth '+this.password);
-		xmlhttp.send();
-		return channel;
-	}
 	if(!options.password){
 		this.password = "SCHMOOPIIE";//익명의 사용자
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
 		this.port=80;
 	}else{//인증키가 있는 채팅
-		if(!options.channel)options.username=options.channel=JSON.parse(this.getChannel(options.password))["login"];
+		if(!options.channel)options.username=options.channel=JSON.parse(getChannel(options.password))["login"];
 		this.username = options.username;
 		this.password = options.password;
 	  this.port=443;
@@ -210,4 +202,12 @@ function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 			location.href = link;
 		},1000);
 	}
+}
+function getChannel(oauth){
+	var xmlhttp = new XMLHttpRequest(),channel="";
+	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
+	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
+	xmlhttp.setRequestHeader('Authorization','OAuth '+oauth);
+	xmlhttp.send();
+	return channel;
 }
