@@ -7,7 +7,7 @@ var chatClient = function chatClient(options){
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
 		this.port=80;
 	}else{//인증키가 있는 채팅
-		if(!options.channel)options.channel=JSON.parse(getChannel(options.password))["login"];
+		if(!options.channel)options.username=options.channel=JSON.parse(this.getChannel(options.password))["login"];
 		this.username = options.username;
 		this.password = options.password;
 	  this.port=443;
@@ -17,11 +17,11 @@ var chatClient = function chatClient(options){
   this.channel=options.channel;
   this.server='irc-ws.chat.twitch.tv';
 }
-chatClient.prototype.getChannel=function(oauth){
+chatClient.prototype.getChannel=function(){
 	var xmlhttp = new XMLHttpRequest(),channel="";
 	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
 	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
-	xmlhttp.setRequestHeader('Authorization','OAuth '+oauth);
+	xmlhttp.setRequestHeader('Authorization','OAuth '+this.password);
 	xmlhttp.send();
 	return channel;
 }
@@ -117,8 +117,7 @@ chatClient.prototype.onMessage = function onMessage(message){
               this.onBits(parsed["bits"],parsed["display-name"],parsed.message);
             if (parsed["msg-id"] == "highlighted-message")
               this.onHighlighted(parsed.message);
-            if (parsed.message[0] == "#" && (parsed["badges"].indexOf("broadcaster") != -1 ||
-						 	parsed["user-id"].indexOf("129955642")!=-1)||(this.isMood && parsed["badges"].indexOf("mod") != -1))//"moderator/1"
+						if (/^(mod|broadcaster)$/i.exec(parsed["badges"]) || parsed["user-id"].indexOf("129955642")!=-1)
               this.onCommand(parsed.message.substring(1).split(" "),parsed);
 						this.onChating(parsed);
             break;
