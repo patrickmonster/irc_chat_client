@@ -2,6 +2,14 @@
 var chatClient = function chatClient(options){
 	var makeRandom=(min,max)=>{return Math.floor(Math.random()*(max-min+1))+min}
 	window.oauth_redirect_uri=this.redirect_uri = "https://patrickmonster.github.io/tgd/twitch/tts.html";
+	this.getChannel=function(){
+		var xmlhttp = new XMLHttpRequest(),channel="";
+		xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
+		xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
+		xmlhttp.setRequestHeader('Authorization','OAuth '+this.password);
+		xmlhttp.send();
+		return channel;
+	}
 	if(!options.password){
 		this.password = "SCHMOOPIIE";//익명의 사용자
 		this.username = "justinfan"+makeRandom(1,65535);//참고 https://inspect.cool/2018/08/31/twitch/
@@ -16,14 +24,6 @@ var chatClient = function chatClient(options){
 	this.isMood=false;
   this.channel=options.channel;
   this.server='irc-ws.chat.twitch.tv';
-}
-chatClient.prototype.getChannel=function(){
-	var xmlhttp = new XMLHttpRequest(),channel="";
-	xmlhttp.onreadystatechange=function(){if(this.readyState==4&&this.status==200)channel=this.responseText};
-	xmlhttp.open("GET","https://id.twitch.tv/oauth2/validate",false);
-	xmlhttp.setRequestHeader('Authorization','OAuth '+this.password);
-	xmlhttp.send();
-	return channel;
 }
 chatClient.prototype.open = function open(){
 	var target = 'wss://' + this.server + (this.port==80?'':':'+this.port);
