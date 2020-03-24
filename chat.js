@@ -89,10 +89,6 @@ chatClient.prototype.onMessage = function onMessage(message){
 						this.onJoin(parsed["message"]);
           case "USERSTATE"://사용자 참여
             break;
-          case "PING":
-            this.webSocket.send("PONG :"+parsed['PING']);
-						setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
-						break;
           case "USERNOTICE":break;
           case "PRIVMSG":
             if (parsed["@ban-duration"])return;
@@ -116,6 +112,9 @@ chatClient.prototype.onMessage = function onMessage(message){
           default:
             if (parsed["PING"]){
 							this.webSocket.send("PONG :"+parsed['PING']);
+							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
+						}else if( parsed.command=="PING"){
+	            this.webSocket.send("PONG :"+parsed['PING']);
 							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
 						}
 						break;
