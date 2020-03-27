@@ -54,9 +54,6 @@ chatClient.prototype.parseMessage = function(rawMessage) {
       if (parsedMessage["command"] == "JOIN")
         parsedMessage["message"] =data[0].split("!")[0].substring(1);
 			else parsedMessage["message"] = rawMessage
-    }else if (rawMessage.indexOf("PING") != -1){
-      parsedMessage['PING'] = rawMessage.substring(rawMessage.indexOf(":")+1);
-			setTimeout(function(t){t.webSocket.send("PING")},60*1000,this);
     }else {
       for (var i = 0; i < data.length; i++){
         var d = data[i].split("=");
@@ -106,14 +103,14 @@ chatClient.prototype.onMessage = function onMessage(message){
 							var message =parsed["message"];
 							parsed["emotes"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"],true);
 							for (const replace_id in parsed["emotes"]){
-								message = message.replace(new RegExp(escapeRegExp(replace_id), "g"), "<img class='chat-image' src=https://static-cdn.jtvnw.net/emoticons/v1"+replace_id+"/3.0 ></img>");
+								message = message.replace(new RegExp(escapeRegExp(replace_id), "g"), "<img class='chat-image' src=https://static-cdn.jtvnw.net/emoticons/v1/"+parsed["emotes"][replace_id]+"/3.0 ></img>");
 								parsed["message"] = parsed["message"].replace(new RegExp(escapeRegExp(replace_id), "g"), "");
 							}
 							parsed["message-original"] = message;//원본 이미지
-							if(parsed["msg-id"] == "highlighted-message"){
-								this.onHighlighted(parsed);
-								return;
-							}
+						}else parsed["message-original"]=parsed["message"];
+						if(parsed["msg-id"] == "highlighted-message"){
+							this.onHighlighted(parsed);
+							return;
 						}
             if (parsed["bits"])
               this.onBits(parsed["bits"],parsed["display-name"],parsed["message-original"]);
