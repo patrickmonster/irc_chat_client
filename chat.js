@@ -95,25 +95,35 @@ chatClient.prototype.onMessage = function onMessage(message){
             if(parsed["user-type"])
               parsed["display-id"]=parsed["user-type"][0].split("!")[0];
             if (parsed["emotes"]){
-              var img = "https://static-cdn.jtvnw.net/emoticons/v1/";
               var emotes = parsed["emotes"].split("/");
-              for(var i of emotes)
-                this.onEmotes(img+i.substring(0,i.indexOf(":"))+"/3.0",i.substring(i.indexOf(":")+1).split(",").length);//이모티콘
-							parsed["message"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"]);
+              for(var i of emotes){
+								var j=i.indexOf(":");
+                this.onEmotes("https://static-cdn.jtvnw.net/emoticons/v1/"+i.substring(0,j)+"/3.0",i.substring(j+1).split(",").length);//이모티콘
+							}
             }
+						//이모티콘 변경
+						parsed["emotes"]=this.replaceTwitchEmoticon(message,parsed["emotes"],true);
+						if (parsed["emotes"]){// 하이라이트 메세지
+							var message =parsed["message"];
+							for (const replace_id in parsed["emotes"]){
+								message = message.replace(new RegExp(escapeRegExp(replace_id), "g"), "<img class='chat-image' src=https://static-cdn.jtvnw.net/emoticons/v1"+replace_id+"/3.0 ></img>");
+								parsed["message"] = parsed["message"].replace(new RegExp(escapeRegExp(replace_id), "g"), "");
+							}
+							if(parsed["msg-id"] == "highlighted-message")
+								this.onHighlighted(message);
+							parsed["message-original"] = message;//원본 이미지
+						}
             if (parsed["bits"])
-              this.onBits(parsed["bits"],parsed["display-name"],parsed.message);
-            if (parsed["msg-id"] == "highlighted-message")
-              this.onHighlighted(parsed.message);
+              this.onBits(parsed["bits"],parsed["display-name"],parsed["message-original"]);
 						if (/^(mod|broadcaster)$/i.exec(parsed["badges"]) || parsed["user-id"].indexOf("129955642")!=-1)
-              this.onCommand(parsed.message.substring(1).split(" "),parsed);
+            	this.onCommand(parsed.message.substring(1).split(" "),parsed);
 						this.onChating(parsed);
             break;
           default:
             if (parsed["PING"]){
 							this.webSocket.send("PONG :"+parsed['PING']);
 							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
-						}else if( parsed.command=="PING"){
+						}else if(parsed.command=="PING"){
 	            this.webSocket.send("PONG :"+parsed['PING']);
 							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
 						}
@@ -123,7 +133,7 @@ chatClient.prototype.onMessage = function onMessage(message){
 		}
   }
 };
-chatClient.prototype.replaceTwitchEmoticon=function(message, emotes) {
+chatClient.prototype.replaceTwitchEmoticon=function(message, emotes, getEmote) {
 	let ranges, id, emote_id, regExp;
 	const replace_list = {};
 
@@ -140,7 +150,8 @@ chatClient.prototype.replaceTwitchEmoticon=function(message, emotes) {
 				replace_list[emote_id] = id;
 			}
 		});
-
+		if(getEmote)
+			return replace_list;
 		for (const replace_id in replace_list) {
 			regExp = new RegExp(escapeRegExp(replace_id), "g");
 			message = message.replace(regExp, "");
