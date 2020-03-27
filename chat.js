@@ -109,8 +109,10 @@ chatClient.prototype.onMessage = function onMessage(message){
 								message = message.replace(new RegExp(escapeRegExp(replace_id), "g"), "<img class='chat-image' src=https://static-cdn.jtvnw.net/emoticons/v1"+replace_id+"/3.0 ></img>");
 								parsed["message"] = parsed["message"].replace(new RegExp(escapeRegExp(replace_id), "g"), "");
 							}
-							if(parsed["msg-id"] == "highlighted-message")
-								this.onHighlighted(message);
+							if(parsed["msg-id"] == "highlighted-message"){
+								this.onHighlighted(parsed);
+								return
+							}
 							parsed["message-original"] = message;//원본 이미지
 						}
             if (parsed["bits"])
