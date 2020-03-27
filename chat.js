@@ -102,9 +102,9 @@ chatClient.prototype.onMessage = function onMessage(message){
 							}
             }
 						//이모티콘 변경
-						parsed["emotes"]=this.replaceTwitchEmoticon(message,parsed["emotes"],true);
 						if (parsed["emotes"]){// 하이라이트 메세지
 							var message =parsed["message"];
+							parsed["emotes"]=this.replaceTwitchEmoticon(parsed["message"],parsed["emotes"],true);
 							for (const replace_id in parsed["emotes"]){
 								message = message.replace(new RegExp(escapeRegExp(replace_id), "g"), "<img class='chat-image' src=https://static-cdn.jtvnw.net/emoticons/v1"+replace_id+"/3.0 ></img>");
 								parsed["message"] = parsed["message"].replace(new RegExp(escapeRegExp(replace_id), "g"), "");
