@@ -54,6 +54,9 @@ chatClient.prototype.parseMessage = function(rawMessage) {
       if (parsedMessage["command"] == "JOIN")
         parsedMessage["message"] =data[0].split("!")[0].substring(1);
 			else parsedMessage["message"] = rawMessage
+    }else if (rawMessage.indexOf("PING") != -1){
+      parsedMessage['PING'] = rawMessage.substring(rawMessage.indexOf(":")+1);
+			setTimeout(function(t){t.webSocket.send("PING")},60*1000,this);
     }else {
       for (var i = 0; i < data.length; i++){
         var d = data[i].split("=");
@@ -119,13 +122,6 @@ chatClient.prototype.onMessage = function onMessage(message){
 						this.onChating(parsed);
             break;
           default:
-            if (parsed["PING"]){
-							this.webSocket.send("PONG :"+parsed['PING']);
-							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
-						}else if(parsed.command=="PING"){
-	            this.webSocket.send("PONG :"+parsed['PING']);
-							setTimeout((i)=>{i.webSocket.send("PING")},60*1000,this);
-						}
 						break;
         }
       }
