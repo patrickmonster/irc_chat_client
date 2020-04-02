@@ -87,6 +87,10 @@ chatClient.prototype.onMessage = function onMessage(message){
         switch(parsed.command){
           case "JOIN":
 						this.onJoin(parsed["message"]);
+					case "CLEARMSG"://login/ message/ target-msg-id
+					case "CLEARCHAT"://ban-duration
+						this.onDelChating(parsed);//
+						break;
           case "USERSTATE"://사용자 참여
             break;
           case "USERNOTICE":break;
@@ -160,6 +164,7 @@ function escapeRegExp(str) {
 chatClient.prototype.onError = function onError(message){console.log('Error: '+message)};
 chatClient.prototype.onSys=function onSys(message){console.log(message)};
 chatClient.prototype.onChating = function(parsed){console.log(parsed)};
+chatClient.prototype.onDelChating = function(parsed){console.log(parsed)};
 chatClient.prototype.onEmotes = function(parsed,count){console.log(parsed)};
 chatClient.prototype.onHighlighted = function(message){console.log(message)};
 chatClient.prototype.onBits = function(bit,name,message){console.log(message)};
