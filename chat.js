@@ -89,7 +89,6 @@ chatClient.prototype.onMessage = function onMessage(message){
 						this.onJoin(parsed["message"]);
 						break;
 					case "CLEARMSG"://login/ message/ target-msg-id
-						break;
 					case "CLEARCHAT"://ban-duration
 						this.onDelChating(parsed);//
 						break;
