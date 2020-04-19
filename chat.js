@@ -203,19 +203,19 @@ function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 		const localstate = localStorage.getItem("state");
 		const last_url = localStorage.getItem("last_url");
 		const last_url_obj = new URL(last_url);
-		document.body.innerHTML = '';
+		document.body.innerHTML = '반응이 없을때에는 F5를 눌러 새로고침 해 주세요!';
 		if (last_url_obj.origin !== authobj.origin) {
 			document.write("SECURITY ERROR");
 		} else {
 			if (localstate === null||localstate===""|| state !== localstate) {
-				document.write("잘못된 state값이 전달되었습니다. 페이지를 새로고침 해보세요.<br/>Invalid state. please refresh and retry.")
-				localStorage.setItem("oauth","");
-				localStorage.setItem("state","");
-				localStorage.setItem("last_url","");
+				document.write("잘못된 state값이 전달되었습니다. 페이지를 새로고침 해보세요.<br/>Invalid state. please refresh and retry.");
+				localStorage.removeItem("oauth");
+				localStorage.removeItem("state");
+				localStorage.removeItem("last_url");
 			} else {
 				localStorage.setItem("oauth", oauth);
-				localStorage.setItem("state", "");
-				localStorage.setItem("last_url", "");
+				localStorage.removeItem("state");
+				localStorage.removeItem("last_url");
 				localStorage.setItem("oauth_date",new Date().toDate());//저장시간 기록
 				location.href=last_url;
 				setTimeout(()=>{location.reload()},500);//리다이렉션 에러시
