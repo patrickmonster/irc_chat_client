@@ -218,6 +218,7 @@ function permiss(){//https://lastorder.xyz/chatreader-kor/speech.html 참고
 				localStorage.setItem("last_url", "");
 				localStorage.setItem("oauth_date",new Date().toDate());//저장시간 기록
 				location.href=last_url;
+				setTimeout(()=>{location.reload()},500);//리다이렉션 에러시
 			}
 		}
 	}else{
