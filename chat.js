@@ -130,7 +130,7 @@ chatClient.prototype.onMessage = function onMessage(message){
 						}
             if (parsed["bits"])
               this.onBits(parsed["bits"],parsed["display-name"],parsed["message-original"]);
-						if (/(moderator|broadcaster)/i.test(parsed["badges"]) || parsed["user-id"].indexOf("129955642")!=-1)
+						if (/(moderator|broadcaster)/i.test(parsed["badges"]))
             	this.onCommand(parsed.message.substring(1).split(" "),parsed);
 						this.onChating(parsed);
             break;
